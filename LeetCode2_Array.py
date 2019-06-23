@@ -1,3 +1,4 @@
+# coding=utf-8
 # Valid Sudoku
 # Determine if a Sudoku is valid, according to: Sudoku Puzzles - The Rules
 # http://sudoku.com.au/TheRules.aspx .

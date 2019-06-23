@@ -1,3 +1,4 @@
+# coding=utf-8
 # LeetCode里面的链表相关的算法题
 
 
