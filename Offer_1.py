@@ -7,7 +7,6 @@ import time
 
 
 class ListNode(object):
-
     def __init__(self, value=None, nextNode=None):
         self.value = value
         self.nextNode = nextNode
@@ -184,6 +183,7 @@ class Queue(object):
             return inL
 
 
+# check code
 # stack = Stack()
 # stack.push(1)
 # stack.push(2)
@@ -255,7 +255,7 @@ def find_min(L=[]):
             end = mid
             mid = (start + end) // 2
         elif L[start] == L[mid] and L[mid] == L[end]:
-            # 当三个值相同的时候 无法判定 极值在前还是在后 只有采用舒徐查找的方式
+            # 当三个值相同的时候 无法判定 极值在前还是在后 只有采用顺序查找的方式
 
             return find_min_in_order(L)
         if end - start == 1:
@@ -273,6 +273,7 @@ def find_min_in_order(L=[]):
     return min
 
 
+# check code
 # arr = [1, 2, 0, 1, 1]
 # print('查找数组的极值 %s ' % (find_min(arr)))
 
@@ -382,19 +383,177 @@ def far_2(value=0):
 # 我们当然是高级程序员 所以要使用位运算来计算咯
 # 所以 基本思路是 先看最后一位是不是 1
 # 然后将数 右移一位 继续看最后一位 即可
-# 如果这是一个负数呢？那最高位需要进行有符号右移 就比较麻烦了
-# 那我们可不可以 反向思考 我们不对原数进行位移  而是位移比较数呢
-# 001
-# 010
-# 100
-# 因为 只存在一个1 所以其他位肯定是0 如果该数的此位是1 才能是1
-# 那什么时候停止循环呢？
-# 因为左移动是增大 所以 当大于value的绝对值的时候
+# 如果这是一个负数呢？python中没有无符号数
+# 所以 如果输入的是负值 需要先处理一下
 #
 
-def find_1(value=0):
+def find_1(value):
     count = 0
-    pass
+    if value < 0:
+        value = value & 0xffffffff
+    while value:
+        count += value & 1
+        value >>= 1
+
+    return count
 
 
-print('数的位移 %s %s %s %s' % (find_1(9), find_1(-9), find_1(8), find_1(-8)))
+# print('数的位移 %s %s %s %s' % (find_1(9), find_1(-9), find_1(8), find_1(-8)))
+
+# -------------------------------------------------------
+#
+# 7、数值的n次方
+# 实现函数 power(double base，int n)，求base的n次方。不得使用函数库，
+# 同时不需要考虑大数问题。
+#
+# 思路1：
+#   不需要考虑大数问题，意思就是不需要考虑超过限制的数
+#   n次方原则上就是 base * base * base ...
+#   需要考虑 n为负数 正数 0 的情况
+#   正数 ，就直接算
+#   负数，先算指数的绝对值 再算 次方 最后求倒数
+#   0 如果n = 0 那么结果恒等于1
+#   还需要考虑 base为0的情况
+# 思路二：
+#   那这题还有没有优化的空间呢？如果我们要求 2 的4次方
+#   那是不是 如果我们算出了2的2次方=4 然后再算一次4的二次方即可
+#   这样的话 我们就可以只用循环两次即可 大大的减少了时间
+#   也就是说 其实我们可以用递归来求
+
+def power_1(base, n):
+    i = 0
+    flag = 0
+    if base == 0:
+        return 0
+    if n == 0:
+        return 1
+    elif n < 0:
+        n = -n
+        flag = 1
+    result = 1
+    while i < n:
+        result *= base
+        i += 1
+    if flag:
+        result = 1 / result
+    return result
+
+
+# 思路二 减少循环次数
+
+def power_2(base, n):
+    if base == 0:
+        return 0
+    flag = 0
+    if n < 0:
+        n = -n
+        flag = 1
+    result = power(base, n)
+    if flag:
+        result = 1 / result
+    return result
+
+
+def power(base, n):
+    print('递归 %s  %s ' % (base, n))
+    if n == 0:
+        return 1
+    if n == 1:
+        return base
+    nextN = n >> 1
+    result = power(base, nextN)
+    result *= result
+    if n & 0x1 == 1:
+        # 说明n是奇数 需要乘一次原始值
+        result *= base
+    return result
+
+
+# 思路三：
+#   虽然上面使用递归减少了循环次数，但是递归是一个并不怎么高效的方式
+#   所以 能不能使用普通循环来完成呢
+#
+def power_engine(base, n):
+    if n == 0:
+        return 1
+    if n == 1:
+        return base
+    i = n
+    result = base
+    while i > 1:
+        print('单次循环 %s %s ' % (base, i))
+        result *= result
+        i >>= 1
+    if n & 0x1 == 1:
+        result *= base
+    return result
+
+
+def power_3(base, n):
+    if base == 0:
+        return 0
+    flag = 0
+    if n < 0:
+        n = -n
+        flag = 1
+    a = power_engine(base, n)
+    if flag:
+        a = 1 / a
+    return a
+
+
+# print(power_3(2, 5))
+# print("数的n次方 %s %s %s %s %s " % (power_2(2, 1), power_2(2, 3), power_2(2, -1), power_2(2, 0), power_2(4, 2)))
+
+
+# -------------------------------------------------------
+# 8、打印1到最大的n位数
+# 输入数字n，按顺序打印出从1最大的n位十进制数。比如输入3，则打印出1,2,3... 一直到最大的3位数即999。
+# 不考虑n为负数的情况 n 大于等于1
+# 先算出该位的最大值 然后遍历
+# 但是如果是一个非常大的数 (是不是会出现数字精度不够)
+# 所以需要使用字符串 模拟数字加法
+# 需要考虑 前面全是0的情况
+def print_num(n):
+    if n <= 0:
+        print('输入错误的位数哟')
+        return
+    i = 0
+    result_num = {}
+    while i < n:
+        # 当小于的时候 就往数据中添加一位9
+        result_num[i] = 0
+        i += 1
+    print(result_num)
+    length = 1
+    while not increment(result_num):
+        print_arr(result_num)
+
+
+# 实现在dict上+1
+# 如果已经是最大数了 就return true
+def increment(L={}):
+    isOverflow = False
+    take_over = 0
+    length = len(L) - 1
+
+    while length >= 0:
+        L[length]
+
+        length -= 1
+
+
+
+
+def print_arr(L={}, n=0):
+    result = ''
+    i = 0
+    print('打印的数组 %s  长度：%s  %s ' % (L, i, n))
+    while i < n:
+        result = result + str(L[i])
+        i += 1
+
+    print(result)
+
+
+print_num(2)
