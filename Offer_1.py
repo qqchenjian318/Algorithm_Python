@@ -12,6 +12,14 @@ class ListNode(object):
         self.nextNode = nextNode
 
 
+# 树的节点
+class TreeNode(object):
+    def __init__(self, value=None, leftNode=None, rightNode=None):
+        self.value = value
+        self.leftNode = leftNode
+        self.rightNode = rightNode
+
+
 # 1、二维数组的查找
 # 在一个二维数组中，每一个行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。
 # 请完成一个函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
@@ -538,11 +546,7 @@ def increment(L={}):
     length = len(L) - 1
 
     while length >= 0:
-        L[length]
-
-        length -= 1
-
-
+        pass
 
 
 def print_arr(L={}, n=0):
@@ -556,4 +560,350 @@ def print_arr(L={}, n=0):
     print(result)
 
 
-print_num(2)
+# print_num(2)
+# todo 没写完
+
+
+# -------------------------------------------------------
+#
+# 9、在O(1)时间删除链表结点
+# 给定单向链表的头指针和一个结点指针，定义一个函数在O(1)时间删除该结点。
+# 单向链表
+# A-》B—》C—》D—》E
+# 比如给了A 和C 现在要在O(1)的时间复杂度中删除掉C
+# 那就改变C的值 并且将C的下个节点 指向E节点，
+# 1、C节点刚好是最后一个节点
+# 2、链表只存在C一个节点
+
+def delete_node(start_node, delete_node):
+    if start_node == delete_node:
+        # 说明只存在一个节点
+        start_node = None
+    if delete_node.nextNode is not None:
+        # 说明不是最后一个节点
+        delete_node.value = delete_node.nextNode.value
+        delete_node.nextNode = delete_node.nextNode.nextNode
+    else:
+        # 说明要删除的是最后一个节点 那么就顺序遍历 进行删除
+        next_node = start_node
+        while next_node is not None and next_node.nextNode is not None:
+            if next_node.nextNode == delete_node:
+                # 说明到了最后一个节点了
+                next_node.nextNode = delete_node.nextNode
+            next_node = next_node.nextNode
+
+    return start_node
+
+
+# E = ListNode(5, None)
+# D = ListNode(4, E)
+# C = ListNode(3, D)
+# B = ListNode(2, C)
+# A = ListNode(1, B)
+#
+# start = delete_node(A, E)
+# while start is not None:
+#     print(start.value)
+#     start = start.nextNode
+
+# -------------------------------------------------------
+#
+# 10、调整数组顺序使得奇数位于偶数前面
+# 输入一个整数数组，实现一个函数来调整该数组中数字的顺序，
+# 使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分
+# 例如 [1,3,4,2,6,7,9] 调整顺序后为 [1,3,7,9,4,2,6]
+# 思路：
+#   两个指针 start end  如果start为偶数 end为奇数 就交互
+#   如果start为奇数 就往后遍历 直到找到第一个奇偶数的index，
+#   然后遍历end 直到直到第一个为奇数的index 然后交换
+#   直到两者相邻
+#   如果要考虑抽象的话 就需要将判定函数抽象出来,这样就可以扩展
+#   不同规则的排列 比如负数与非负数 能被3整除的和不能被3整除的
+
+def swap_num(L=[]):
+    if L is None or len(L) == 0:
+        return L
+    startIndex = 0
+    endIndex = len(L) - 1
+
+    while startIndex < endIndex:
+
+        if endIndex - startIndex == 1:
+            # 说明 已经遍历完成了 就判定是否要进行交互
+            if L[endIndex] // 2 == 0 and L[endIndex] // 2 != 0:
+                temple = L[startIndex]
+                L[startIndex] = L[endIndex]
+                L[endIndex] = temple
+            break
+        if not isEven(L[startIndex]):
+            # 说明开始的标志是奇数 那么 往后移动
+            startIndex += 1
+        elif isEven(L[endIndex]):
+            # 说明后面的标志数偶数 那么往前移动
+            endIndex -= 1
+        else:
+            # 说明开始的标志数偶数 并且结束的标志数奇数
+            temple = L[startIndex]
+            L[startIndex] = L[endIndex]
+            L[endIndex] = temple
+            startIndex += 1
+            endIndex -= 1
+
+    return L
+
+
+# 判定函数 是否是偶数
+def isEven(n):
+    return n & 0x1 == 0
+
+
+# print(swap_num([1, 3, 4, 2, 6, 7, 9]))
+
+# -------------------------------------------------------
+#
+# 11、链表中倒数第k个结点（Page：124）
+# 输入一个链表，输出该链表中倒数第k个结点。
+# 比如链表1、2、3、4 的倒数第一个结点就是4
+# 思路：
+# 输入的是开始节点 正常思路是 从头开始 遍历到尾部
+# 再回溯打印倒数 但是 这是个单向链表
+# 所以无法回溯
+# 先遍历 将链表逆向 再打印（好像是可行的）
+# 有没有更好的方式呢
+# 我们总共有4个节点 那么倒数第1个节点 就是末尾节点
+# 倒数第3个节点 就是节点3
+# 我们可以定义两个指针，start end
+# start先走k步 当start走到了末尾节点的时候
+# start = end + k -1
+# print_index = end
+# 比如 打印倒数第3个节点 2
+# start = 1 end = 0
+# start = 2  end = 0
+# start = 3  end = 1
+# start = 4  end = 2
+
+def print_k(startNode, k):
+    if startNode is None:
+        print('输入的链表有误 ')
+        return
+    if k == 0:
+        print('输入的节点数有误 ')
+        return
+    start_index = startNode
+
+    i = 0
+    flag = 1
+    while i < k - 1:
+        start_index = start_index.nextNode
+        if start_index is None:
+            print('输入的节点数 大于 链表的节点数 error')
+            flag = 0
+            break
+        i += 1
+    if not flag:
+        return
+    end_index = startNode
+    while start_index is not None and start_index.nextNode is not None:
+        start_index = start_index.nextNode
+        end_index = end_index.nextNode
+
+    print(end_index.value)
+
+
+# E = ListNode(5, None)
+# D = ListNode(4, E)
+# C = ListNode(3, D)
+# B = ListNode(2, C)
+# A = ListNode(1, B)
+#
+# print_k(A, 5)
+# print_k(B, 5)
+# print_k(A, 3)
+# print_k(A, 2)
+# print_k(E, 1)
+
+# -------------------------------------------------------
+#
+# 12、反转链表（Page：129）
+# 定义一个函数，输入一个链表的头结点，反转该链表并输出反转后链表的头结点
+# 思路：
+#   用一个节点储存当前节点，
+#   last current next
+#
+
+#   last = current
+#   current = next
+#   next = next.next
+
+def reverse_list(startNode):
+    if startNode is None:
+        print(" 头节点是None哟")
+        return
+    if startNode.nextNode is None:
+        print("只有一个节点 不需要反转")
+        return
+    currentNode = startNode
+    nextNode = startNode.nextNode
+    lastNode = None
+    while nextNode is not None:
+        # 将cur的next指向last
+        currentNode.nextNode = lastNode
+
+        # 往下移动一位
+        lastNode = currentNode
+        currentNode = nextNode
+        nextNode = nextNode.nextNode
+
+        print(currentNode)
+        if nextNode is not None:
+            print(' last:%s  cur:%s  next:%s ' % (lastNode.value, currentNode.value, nextNode.value))
+        else:
+            currentNode.nextNode = lastNode
+    return currentNode
+
+
+# E = ListNode(5, None)
+# D = ListNode(4, E)
+# C = ListNode(3, D)
+# B = ListNode(2, C)
+# A = ListNode(1, B)
+#
+# start = reverse_list(E)
+# print(start)
+# while start is not None:
+#     print(start.value)
+#     start = start.nextNode
+
+# -------------------------------------------------------
+#
+# 13、合并两个排序的链表（Page：131）
+# 输入两个递增排序的链表，合并这两个链表并使得新链表中的结点仍然是按照递增排序的。例如下图
+# 链表1  1->3->5->7
+# 链表2  2->4->6->8
+# 链表3  1->2->3->4->5->6->7->
+#
+# 思路：
+#   不多说 肯定是依次放入两个链表 然后移动指针
+
+def merge_list(list_a, list_b):
+    if list_a is None and list_b is None:
+        print('两个链表都是None哟')
+        return
+    if list_b is None:
+        return list_a
+    if list_a is None:
+        return list_b
+
+    # 新建一个列表
+    if list_a.value > list_b.value:
+        next_list = list_b
+        list_b = list_b.nextNode
+    else:
+        next_list = list_a
+        list_a = list_a.nextNode
+    headNode = next_list
+    while list_a is not None or list_b is not None:
+        # 当两者都为None的时候 就结束
+        if list_b is None:
+            next_list.nextNode = list_a
+            list_a = list_a.nextNode
+        if list_a is None:
+            next_list.nextNode = list_b
+            list_b = list_b.nextNode
+
+        if list_a is not None and list_b is not None:
+            if list_a.value < list_b.value:
+                next_list.nextNode = list_a
+                list_a = list_a.nextNode
+            else:
+                next_list.nextNode = list_b
+                list_b = list_b.nextNode
+
+        next_list = next_list.nextNode
+    return headNode
+
+
+# check code
+# G = ListNode(7, None)
+# E = ListNode(5, G)
+# C = ListNode(3, E)
+# A = ListNode(1, C)
+#
+# H = ListNode(8, None)
+# F = ListNode(6, H)
+# D = ListNode(4, F)
+# B = ListNode(2, D)
+#
+# resultNode = merge_list(A, B)
+# while resultNode is not None:
+#     print(resultNode.value)
+#     resultNode = resultNode.nextNode
+
+
+# -------------------------------------------------------
+#
+# 14、树的子结构（Page：134）
+# 输入两颗二叉树A和B，判断B是不是A的子结构，二叉树的结点的定义如下：
+# class TreeNode{
+#   int value;
+#   TreeNode left_node;
+#   TreeNode right_node;
+# }
+#   树 A             树 B
+#        8                 8
+#    8       7          9     2
+# 9     2
+#    4     7
+#  如上 右边的树B 就是左边的树A的子树
+#
+# 思路：
+#   没有说树是排过序的
+#   所以 用递归的方式 输入两个树的起始节点 判定 所有的子树的子节点是否一致
+#   如果value一致的话  就hasTree1InTree2
+#   如果没有的话 就判定左树
+#   如果还是没有 就判定右树
+#
+#   has_tree1_in_tree2函数
+#   说明当前节点的value一致 判断子节点是否一致
+#   广西百花香果
+
+def has_sub_tree(tree_a, tree_b):
+    result = False
+    if tree_a is not None and tree_b is not None:
+        if tree_a.value == tree_b.value:
+            result = has_tree1_in_tree2(tree_a, tree_b)
+        if not result:
+            result = has_sub_tree(tree_a.leftNode, tree_b)
+
+        if not result:
+            result = has_sub_tree(tree_a.rightNode, tree_b)
+
+    return result
+
+
+def has_tree1_in_tree2(tree_a, tree_b):
+    if tree_a is None:
+        return False
+    if tree_b is None:
+        return True
+    if tree_a.value != tree_b.value:
+        # 如果两个节点的value不一致 那么就false
+        return False
+    # 说明两个节点的value一致 那么判定他们的左右节点是否一致
+    return has_tree1_in_tree2(tree_a.rightNode, tree_b.rightNode) and has_tree1_in_tree2(tree_a.leftNode,
+                                                                                         tree_b.leftNode)
+
+
+four4 = TreeNode(4, None, None)
+four7 = TreeNode(7, None, None)
+three9 = TreeNode(9, None, None)
+three2 = TreeNode(2, four4, four7)
+two8 = TreeNode(8, three9, three2)
+two7 = TreeNode(7, None, None)
+one8 = TreeNode(8, two8, two7)
+
+child9 = TreeNode(9, None, None)
+child2 = TreeNode(2, None, None)
+child8 = TreeNode(8, child9, child2)
+
+print(has_sub_tree(one8, child8))
