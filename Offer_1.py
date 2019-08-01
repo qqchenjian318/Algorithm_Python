@@ -1,9 +1,7 @@
 # coding=utf-8
 
-import time
 
-
-# 剑指offer的算法题 python实现
+# 剑指offer的算法题 python实现 1 到17题
 
 
 class ListNode(object):
@@ -19,7 +17,8 @@ class TreeNode(object):
         self.leftNode = leftNode
         self.rightNode = rightNode
 
-
+# ---------------------------------------------------------------
+#
 # 1、二维数组的查找
 # 在一个二维数组中，每一个行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。
 # 请完成一个函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。
@@ -894,16 +893,204 @@ def has_tree1_in_tree2(tree_a, tree_b):
                                                                                          tree_b.leftNode)
 
 
-four4 = TreeNode(4, None, None)
-four7 = TreeNode(7, None, None)
-three9 = TreeNode(9, None, None)
-three2 = TreeNode(2, four4, four7)
-two8 = TreeNode(8, three9, three2)
-two7 = TreeNode(7, None, None)
-one8 = TreeNode(8, two8, two7)
+# four4 = TreeNode(4, None, None)
+# four7 = TreeNode(7, None, None)
+# three9 = TreeNode(9, None, None)
+# three2 = TreeNode(2, four4, four7)
+# two8 = TreeNode(8, three9, three2)
+# two7 = TreeNode(7, None, None)
+# one8 = TreeNode(8, two8, two7)
+#
+# child9 = TreeNode(9, None, None)
+# child2 = TreeNode(2, None, None)
+# child8 = TreeNode(8, child9, child2)
+#
+# print(has_sub_tree(one8, child8))
 
-child9 = TreeNode(9, None, None)
-child2 = TreeNode(2, None, None)
-child8 = TreeNode(8, child9, child2)
+# -------------------------------------------------------
+#
+# 15、二叉树的镜像（Page：142）
+# 请完成一个函数，输入一个二叉树，该函数输出它的镜像（下图中，右边二叉树就是左边二叉树的镜像）
+#       8           |         8
+#   6       10      |     10      6
+# 5    7  9    11   |  11    9  7   5
 
-print(has_sub_tree(one8, child8))
+# 其实 就是将所有的节点的左右节点进行交换
+#   例如：8的字节点 6和10 进行交换  子节点之间 并不进行子节点的交换
+#   通过递归的方式 进行所有子节点的交换
+# 下面这个思路是通过递归来实现的
+# 如果需要用循环来做 应该怎么做呢
+# 其实就是 当某一层的所有的树节点都为None 就不再进行循环
+
+def tree_mirror(tree_a):
+    if tree_a is None:
+        print()
+    if tree_a.leftNode is None and tree_a.rightNode is None:
+        # 说明该节点 没有更多的子节点了 不再进行交换
+        return
+    if tree_a.leftNode is not None:
+        tree_mirror(tree_a.leftNode)
+    if tree_a.rightNode is not None:
+        tree_mirror(tree_a.rightNode)
+    # 该节点的左右子节点 都已经交换完毕了 对他们两个进行交换
+    tempNode = tree_a.leftNode
+    tree_a.leftNode = tree_a.rightNode
+    tree_a.rightNode = tempNode
+
+    return tree_a
+
+
+def printTree(treeNode):
+    if treeNode is None:
+        print('< value:None  left: None  right: None >')
+        return
+        # 对一个树节点进行打印
+    left = None if treeNode.leftNode is None else treeNode.leftNode.value
+    right = None if treeNode.rightNode is None else treeNode.rightNode.value
+
+    print('< value ：%s  left: %s  right: %s > ' % (treeNode.value, left, right))
+
+
+# three11 = TreeNode(11, None, None)
+# three9 = TreeNode(9, None, None)
+# three5 = TreeNode(5, None, None)
+# three7 = TreeNode(7, None, None)
+#
+# two6 = TreeNode(6, three5, three7)
+# two10 = TreeNode(10, three9, three11)
+#
+# one8 = TreeNode(8, two6, two10)
+#
+#
+# resultTree = tree_mirror(one8)
+# printTree(resultTree)
+# printTree(resultTree.leftNode)
+# printTree(resultTree.rightNode)
+
+# -------------------------------------------------------
+#
+# 16、顺时针打印矩阵（Page：145）
+# 输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每个数字，例如：如果输入如下矩阵
+# 1     2       3       4       5
+# 6     7       8       9       10
+# 11    12      13      14      15
+# 16    17      18      19      20
+# 21    22      23      24      25
+#
+# 依次打印出 1、2、3、4、8、12、16、15、14、13、9、5、6、7、11、10
+#
+# 思路：
+#    其实就是一圈一圈的打印
+#    每一圈 可能打印的内容包括
+#       leftTop—》rightTop
+#       rightTop->rightBottom
+#       rightBottom->leftBottom
+#       leftBottom->leftTop
+#   正常的情况是都包含
+#   但是也存在不包含的情况 需要具体的进行分析
+#   圈数行数>圈数*2 并且列数 > 圈数*2
+
+
+def print_rect(L=[]):
+    if L is None or len(L) == 0:
+        print('输入了无效的数组哟 ')
+        return
+    max_x = len(L[0])
+    max_y = len(L)
+    start = 0
+    while max_x > start * 2 and max_y > start * 2:
+        # 打印一圈
+        print_circle(max_x, max_y, start, L)
+        start += 1
+
+
+def print_circle(max_x, max_y, start, L=[]):
+    # start 当前的圈数 max_x 行数 max_y 列数
+    # 判定循环结束的位置
+    end_x = max_x - start
+    end_y = max_y - start
+    # 循环开始的位置 第0圈就是[0][0]
+    # 第1圈就是[1][1]
+    # 第2圈就是[2][2]
+    # 打印leftTop -> rightTops
+
+    for i in range(end_x):
+        if i >= start:
+            # leftTop->rightTop
+            print(L[start][i])
+
+    if start < end_y:
+        for i in range(end_y):
+            if i > start:
+                print(L[i][end_x - 1])
+
+    i = end_x - 2
+    while i > start:
+        print(L[end_y - 1][i])
+        i -= 1
+    i = end_y - 1
+    while i > start:
+        print(L[i][start])
+        i -= 1
+
+
+# arr = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+# print_rect(arr)
+
+
+# -------------------------------------------------------
+#
+# 17、包含min函数的栈（Page：149）
+# 定义栈的数据结构，请在该类型中实现一个能够得到栈的最小元素的min函数。在该栈中，调用min、push以及pop的时间复杂度都是0(1)
+# 栈 ：
+#   先进后出
+#   包含 push min pop函数，并且这几个函数的时间复杂度都是O(1)
+# 思路：
+#   意思是在不影响 存储和取出函数的基础上 实现min函数
+#   可不可拿一个当前存储的最小值
+#   但是 如果当前的最小值被弹出了栈 那怎么得到倒数第二小的值？？
+#   那可以不可以用一个辅助排好序的栈，那这样时间复杂度就高了
+#   那可不可以用一个辅助栈去保存 当次比较的最小值
+#   意思是，
+#   添加          本栈      辅助栈（min）
+#   3              3        3
+#   4             3、4     3、3
+#   2           3、4、2   3、3、2
+#
+#   这样就能保证辅助栈中位于栈顶的一直是最小值
+class MinStack(object):
+    def __init__(self):
+        self.minStack = []
+        self.stack = []
+        self.minValue = None
+
+    def min(self):
+        if len(self.minStack) == 0:
+            return None
+        return self.minStack.pop()
+
+    def push(self, value):
+        self.stack.append(value)
+        if self.minValue is not None:
+            if value < self.minValue:
+                self.minValue = value
+            self.minStack.append(self.minValue)
+        else:
+            self.minStack.append(value)
+            self.minValue = value
+
+    def pop(self):
+        return self.stack.pop()
+
+
+# stack = MinStack()
+# stack.push(3)
+# stack.push(4)
+# stack.push(2)
+# print('min  %s' % stack.min())
+# print('pop  %s' % stack.pop())
+# print('min  %s' % stack.min())
+# print('pop  %s' % stack.pop())
+# print('min  %s' % stack.min())
+# print('pop  %s' % stack.pop())
+# print('min  %s' % stack.min())
