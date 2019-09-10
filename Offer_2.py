@@ -377,5 +377,51 @@ def print_str(strArray):
     if strArray is None or len(strArray):
         print("input array is None")
         return
+    pass
 
 
+# ---------------------------------------------------------------
+#
+# 25、数组中出现次数超过一半的数字（P：180）
+# 数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。
+# 例如输入一个长度为9的数组{1、2、3、2、2、2、5、4、2}。
+# 由于2在数组中出现了5次，超过数组长度的一半，因此输出5。
+# 思路：
+#    输入的数组不一定是排序的，所以其中一个思路就是
+#   1、先进行排序，最后找到最近那个数 一定是超过一半的数字
+#   2、不排序，顺序遍历一次即可 初始化 a = 0
+#      每出现一个数 如果和上个数不一样 就-1 如果和上个数一样 就+1
+#       如果当前次数是0 就保存本次的数 并且次数 = 1
+
+def find_more_num(num_array):
+    print(len(num_array))
+    if num_array is None or len(num_array) == 0:
+        print("input array is None")
+        return
+    a = 1
+    b = -999
+
+    for n in range(len(num_array)):
+        value = num_array[n]
+        if value != b:
+            a -= 1
+        else:
+            a += 1
+        print('a=',a,',b=',b,',value=',value)
+        if a == 0:
+            b = value
+            a = 1
+
+    print('数组中超过一半的数字是 ',b)
+
+# arr = [1,2,3,2,2,2,5,4,2]
+# find_more_num(arr)
+
+# ---------------------------------------------------------------
+#
+# 26、最小的k个数
+# ﻿输入n个整数，找出其中最小的k个数，
+#  例如输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4.
+#
+#  思路：
+#
